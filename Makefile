@@ -1,7 +1,7 @@
 # Variables
 CC = x86_64-elf-g++#compiler
 LD = x86_64-elf-ld#linker
-CFLAGS = -ffreestanding -nostdlib -c -m64
+CFLAGS = -ffreestanding -nostdlib -c -m64 -march=x86-64
 LDFLAGS = -T src/linker.ld
 
 # File paths
@@ -27,7 +27,7 @@ all: $(ISO_IMAGE)
 # create iso rules
 $(ISO_IMAGE): $(KERNEL_BIN) $(GRUB_DIR)/grub.cfg
 	mkdir -p $(ISO_BOOT_GRUB_DIR)
-	cp $(KERNEL_BIN) $(ISO_BOOT_GRUB_DIR)/kernel.bin
+	cp $(KERNEL_BIN) $(ISO_BOOT_DIR)/kernel.bin
 	grub-mkrescue -o $(ISO_IMAGE) $(ISO_DIR)
 
 # rule to link kernel
@@ -51,7 +51,7 @@ $(GRUB_DIR)/grub.cfg:
 	echo "set timeout=0" > $(GRUB_DIR)/grub.cfg
 	echo "set default=0" >> $(GRUB_DIR)/grub.cfg
 	echo 'menuentry "okos" {' >> $(GRUB_DIR)/grub.cfg
-	echo "	multiboot /boot/grub/kernel.bin" >> $(GRUB_DIR)/grub.cfg
+	echo "	multiboot /boot/kernel.bin" >> $(GRUB_DIR)/grub.cfg
 	echo "	boot" >> $(GRUB_DIR)/grub.cfg
 	echo "}" >> $(GRUB_DIR)/grub.cfg
 	cp $(GRUB_DIR)/grub.cfg $(ISO_BOOT_GRUB_DIR)
