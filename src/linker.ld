@@ -1,15 +1,8 @@
-OUTPUT_FORMAT("elf64-x86_64")
-ENTRY(_start)
-SECTIONS
-{
-  . = 0x100000; /* Start address for the kernel */
-
-  .text : {
-    *(.text)
-  }
-
-  .bss : {
-    *(.bss)
-    *(COMMON)
-  }
+OUTPUT_FORMAT("elf64-x86-64")
+ENTRY(start)
+SECTIONS {
+    . = 1M;
+    .text : { *(.text) }
+    .data : { *(.data) }
+    .bss : { *(.bss) }
 }
