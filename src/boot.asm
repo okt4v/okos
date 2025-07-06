@@ -10,7 +10,7 @@ _start:
   mov ds, ax
   mov es, ax
   mov ss, ax
-  mov sp, 0x7c00 ;stack pointer
+  mov sp, 0x80000 ;stack pointer
 
   call kernel_main ;call kernel_main funtion from cpp file
 

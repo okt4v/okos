@@ -1,7 +1,7 @@
 # Variables
 CC = x86_64-elf-g++#compiler
 LD = x86_64-elf-ld#linker
-CFLAGS = -ffreestanding -c -m64
+CFLAGS = -ffreestanding -nostdlib -c -m64
 LDFLAGS = -T src/linker.ld
 
 # File paths
