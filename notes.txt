@@ -1,0 +1,19 @@
+colors for writing to the console:
+| Value | Color Name    | Description    |
+| ----- | ------------- | -------------- |
+| 0     | Black         |                |
+| 1     | Blue          | Dark Blue      |
+| 2     | Green         | Dark Green     |
+| 3     | Cyan          | Dark Cyan      |
+| 4     | Red           | Dark Red       |
+| 5     | Magenta       | Dark Magenta   |
+| 6     | Brown         | Dark Yellow    |
+| 7     | Light Gray    |                |
+| 8     | Dark Gray     |                |
+| 9     | Light Blue    | Bright Blue    |
+| 10    | Light Green   | Bright Green   | A
+| 11    | Light Cyan    | Bright Cyan    | B
+| 12    | Light Red     | Bright Red     | C
+| 13    | Light Magenta | Bright Magenta | D
+| 14    | Yellow        | Bright Yellow  | E
+| 15    | White         | Bright White   | F
