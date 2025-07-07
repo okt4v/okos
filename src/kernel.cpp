@@ -1,4 +1,3 @@
-#include <cstdint>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -121,6 +120,24 @@ extern "C" void keyboard_handler(uint8_t scancode) {
       c = shift_scancodes[scancode];
     } else {
       c = scancodes[scancode];
+    }
+
+    if (c != 0) {
+      if (c == '\b') { // backspace
+        if (terminal_column > 0) {
+          terminal_column--;
+          putchar_at(' ', terminal_column, terminal_row);
+        }
+      } else if (c == '\n') { // enter
+        print("\nOKOS>");     // print new prompt to screen
+      } else {
+        putchar_at(c, terminal_column, terminal_row);
+        terminal_column++;
+        if (terminal_column > vga_width) {
+          terminal_column = 0;
+          terminal_row++;
+        }
+      }
     }
   }
 }
