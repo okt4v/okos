@@ -48,32 +48,3 @@ extern "C" void kernel_main() {
     __asm__("hlt");
   }
 }
-
-// continue with this tomorow and add print function
-/*
-void putchar_at(char c, size_t x, size_t y) {
-  const size_t index = y * vga_width + x;
-  vga_memory[index] = ((uint16_t)default_color << 8) | c;
-}
-
-void print(const char* str) {
-  for (size_t i = 0; str[i] != '\0'; ++i) {
-    if (str[i] == '\n') {
-      terminal_column = 0;
-      terminal_row++;
-    } else {
-      putchar_at(str[i], terminal_column, terminal_row);
-      terminal_column++;
-      if (terminal_column >= vga_width) {
-        terminal_column = 0;
-        terminal_row++;
-      }
-    }
-
-    if (terminal_row >= vga_height) {
-      // No scrolling implemented, so just stop at bottom
-      break;
-    }
-  }
-}
-*/
