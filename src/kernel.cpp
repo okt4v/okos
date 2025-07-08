@@ -5,7 +5,7 @@ const size_t vga_width = 80;
 const size_t vga_height = 25;
 uint16_t *const vga_memory = (uint16_t *)0xb8000;
 
-const uint8_t default_color = 0x07;
+const uint8_t default_color = 0x1F;
 
 size_t terminal_row = 0;
 size_t terminal_column = 0;
@@ -142,10 +142,30 @@ extern "C" void keyboard_handler(uint8_t scancode) {
   }
 }
 
+void banner() {
+  print("\n\n\n\n\n\n\n\n\n");
+  print("                            ");
+  print(" ___       ___   ___\n");
+  print("                            ");
+  print("/   \\ | / /   \\ /   \\\n");
+  print("                            ");
+  print("|   | |/  |   | |___\n");
+  print("                            ");
+  print("|   | |\\  |   |     \\\n");
+  print("                            ");
+  print("\\___/ | \\ \\___/ \\___|\n");
+  print("\n                        ");
+  print("https://github.com/okt4v/okos\n");
+}
+
 extern "C" void kernel_main() {
   clear_screen();
-  print("Welcome to OKOS! \n");
-  print("This OS is still under development please be patient...");
+  print("Welcome to OKOS!\n");
+  print("This OS is still under development please be patient...\n");
+  print("\n");
+  print("View the progress at https://github.com/okt4v/okos\n");
+  clear_screen();
+  banner();
   while (1) {
     __asm__("hlt");
   }

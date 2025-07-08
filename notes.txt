@@ -17,3 +17,55 @@ colors for writing to the console:
 | 13    | Light Magenta | Bright Magenta | D
 | 14    | Yellow        | Bright Yellow  | E
 | 15    | White         | Bright White   | F
+
+
+
+block character █████████
+half block character top ▀▀▀▀▀▀▀
+half block character bottom ▄▄▄▄▄▄▄▄
+shaded block character ░░░░░░░░░░░
+
+
+
+
+██████  ██ ▄█ ██████  ██████
+██  ██  ██▄█  ██  ██  ██
+██  ██  ███   ██  ██  ██████
+██  ██  ██▀█  ██  ██      ██
+██████  ██ ▀█ ██████  ██████
+
+
+
+
+ ___       ___  _____
+/   \ | / /   \ |
+|   | |/  |   | |____
+|   | |\  |   |     |
+\___/ | \ \___/ ____|
+
+
+
+
+
+
+print(" ___       ___  _____\n")
+print("/   \ | / /   \ |\n")
+print("|   | |/  |   | |____\n")
+print("|   | |\  |   |     |\n")
+print("\___/ | \ \___/ ____|\n")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
