@@ -1,3 +1,9 @@
+// TODO: create a sleep funtion to delay events
+// TODO: keyboard input (i think i need to write some more assembly)
+// (remindercheck deepseek for help)
+// TODO: add input reading capabilities
+// TODO: add funtional commands
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -5,7 +11,7 @@ const size_t vga_width = 80;
 const size_t vga_height = 25;
 uint16_t *const vga_memory = (uint16_t *)0xb8000;
 
-const uint8_t default_color = 0x1F;
+const uint8_t default_color = 0x8A;
 
 size_t terminal_row = 0;
 size_t terminal_column = 0;

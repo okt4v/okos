@@ -56,6 +56,32 @@ gdt64_pointer:
     dw $ - gdt64 - 1
     dq gdt64
 
+; idt setup for keaboard interupts
+align 8 
+idt:
+  times 256 dq 0 
+idt_pointer:
+  dw 256 * 16 - 1 
+  dq idt
+
+; remap pic and enable keyboard interupts
+setup_interupts:
+; Remap PIC
+    mov al, 0x11
+    out 0x20, al    ; ICW1 to master
+    out 0xA0, al    ; ICW1 to slave
+    mov al, 0x20
+    out 0x21, al    ; Master offset = 0x20
+    mov al, 0x28
+    out 0xA1, al    ; Slave offset = 0x28
+    mov al, 0x04
+    out 0x21, al    ; Tell master about slave
+    mov al, 0x02
+    out 0xA1, al    ; Tell slave its cascade
+    mov al, 0x01
+    out 0x21, al    ; 8086 mode
+    out 0xA1, al
+
 ; Page tables (simplified)
 align 4096
 pml4_table:
