@@ -1,7 +1,7 @@
 ASM = nasm
 ASMFLAGS = -f elf64 
 CC = gcc
-CFLAGS = -ffreestanding -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -Wall -Wextra -I$(CSRC)
+CFLAGS = -ffreestanding -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -Wall -Wextra -I$(CSRC) -fno-stack-protector
 LD = ld 
 LDFLAGS = -n -T
 
