@@ -13,7 +13,7 @@ static unsigned char color = 0x0F;
 
 void terminal_initialize(void) {
   terminal_clear();
-  terminal_printf("Welcome to {0A}OKOS{07}!\n");
+  terminal_printf("Welcome to {0A}OKOS{0F}!\n\n");
 
   idt_install();
 }
