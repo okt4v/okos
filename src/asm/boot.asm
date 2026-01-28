@@ -86,16 +86,29 @@ enable_paging:
 
 bits 64
 long_mode_start:
-    ; Set stack pointer
+    ; Set up stack first
     mov rsp, 0x200000
     and rsp, -16
-    
-    ; Load segments (skip ss)
+
+    ; Load data segment selector (0x10) into segment registers
     mov ax, 0x10
     mov ds, ax
     mov es, ax
     mov fs, ax
     mov gs, ax
+
+    ; Set SS by pushing it and using far return trick
+    ; Push SS (0x10), push RSP, push RFLAGS, push CS (0x08), push return address
+    push 0x10          ; SS
+    push rsp           ; RSP
+    pushfq             ; RFLAGS
+    push 0x08          ; CS
+    lea rax, [rel .reload_segments]
+    push rax
+    iretq
+
+.reload_segments:
+    ; Now SS is properly set to 0x10
     
     ; Call kernel (rdi and rsi already set from edi/esi)
     call kernel_main
@@ -109,11 +122,11 @@ long_mode_start:
 section .rodata
 align 16
 gdt64:
-    dq 0
+    dq 0                                           ; Null descriptor
 .code: equ 0x08
-    dq (1<<43) | (1<<44) | (1<<47) | (1<<53)
+    dq (1<<43) | (1<<44) | (1<<47) | (1<<53)      ; Code: exec, present, 64-bit
 .data: equ 0x10
-    dq (1<<44) | (1<<47)
+    dq (1<<41) | (1<<44) | (1<<47)                ; Data: writable, present
 .pointer:
-    dw 23
-    dq gdt64
+    dw 23                                          ; Limit (3 entries * 8 - 1)
+    dq gdt64                                       ; Base

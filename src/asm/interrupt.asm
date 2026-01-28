@@ -135,13 +135,8 @@ irq_common_stub:
   push r14
   push r15
 
-  ; IRQ number is at rsp + 120 (15 * 8 bytes)
   mov rdi, [rsp + 120]
-
-  ; Align stack to 16 bytes before call
-  sub rsp, 8
   call irq_handler
-  add rsp, 8
 
   pop r15
   pop r14
@@ -159,7 +154,9 @@ irq_common_stub:
   pop rbx
   pop rax
 
+  ; Clean up error code and IRQ number (16 bytes)
   add rsp, 16
+
   iretq
 
 global idt_load

@@ -17,11 +17,11 @@ void system_initialize(void) {
   // Initialize and remap PIC (map IRQs to interrupts 32-47)
   pic_remap(0x20, 0x28);
 
+  // Install keyboard driver (before enabling interrupts)
+  keyboard_install();
+
   // Enable hardware interrupts
   __asm__ volatile("sti");
-
-  // Install keyboard driver
-  keyboard_install();
 
   // Ready message
   terminal_printf("\n{0E}Keyboard ready. Start typing!{0F}\n");

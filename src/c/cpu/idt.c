@@ -9,7 +9,7 @@ struct idt_entry {
   uint8_t ist;
   uint8_t type_attr;
   uint16_t offset_mid;
-  uint16_t offset_high;
+  uint32_t offset_high;
   uint32_t zero;
 } __attribute__((packed));
 
@@ -24,7 +24,7 @@ static struct idt_ptr idtp;
 void idt_set_gate(uint8_t num, uint64_t handler, uint16_t selector,
                   uint8_t flags) {
   idt[num].offset_low = handler & 0xFFFF;
-  idt[num].offset_mid = (handler >> 16) & 0xFFFf;
+  idt[num].offset_mid = (handler >> 16) & 0xFFFF;
   idt[num].offset_high = (handler >> 32) & 0xFFFFFFFF;
 
   idt[num].selector = selector;
@@ -207,24 +207,16 @@ void irq_install_handler(uint8_t irq, void (*handler)(void)) {
 }
 
 void irq_handler(uint64_t irq_number) {
-  // Handle spurious IRQs (IRQ7 and IRQ15)
-  if (irq_number == 7 || irq_number == 15) {
-    // Check if it's a real IRQ or spurious
-    uint8_t isr = inb(irq_number == 7 ? 0x20 : 0xA0);
-    if (!(isr & (1 << (irq_number & 7)))) {
-      // Spurious IRQ, only send EOI to master if it's IRQ15
-      if (irq_number == 15) {
-        pic_send_eoi(7); // Send EOI to master only
-      }
-      return;
-    }
+  // Validate IRQ number
+  if (irq_number >= 16) {
+    return;
   }
 
   // Call registered handler if exists
-  if (irq_number < 16 && irq_handlers[irq_number] != 0) {
+  if (irq_handlers[irq_number] != 0) {
     irq_handlers[irq_number]();
   }
 
   // Send EOI to PIC
-  pic_send_eoi(irq_number);
+  pic_send_eoi((uint8_t)irq_number);
 }
