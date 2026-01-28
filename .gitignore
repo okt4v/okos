@@ -1,5 +1,6 @@
+backups/
 build/
 iso/
 *.iso 
 *.bin 
-ü.o
+*.o

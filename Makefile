@@ -1,39 +1,60 @@
 ASM = nasm
 ASMFLAGS = -f elf64 
 CC = gcc
-CFLAGS = -ffreestanding -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -Wall -Wextra
+CFLAGS = -ffreestanding -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -Wall -Wextra -I$(CSRC)
 LD = ld 
 LDFLAGS = -n -T
+
 SRC = src
 ASMSRC = src/asm
 CSRC = src/c
 BUILD = build
 ISO = iso
 
+# Automatically find all source files (including subdirectories)
+ASM_SOURCES = $(shell find $(ASMSRC) -name '*.asm' 2>/dev/null)
+C_SOURCES = $(shell find $(CSRC) -name '*.c' 2>/dev/null)
+
+# Generate object file names (flatten to just filename, no paths)
+ASM_OBJS = $(addprefix $(BUILD)/,$(notdir $(ASM_SOURCES:.asm=.o)))
+C_OBJS = $(addprefix $(BUILD)/,$(notdir $(C_SOURCES:.c=.o)))
+
+# All object files
+OBJS = $(ASM_OBJS) $(C_OBJS)
+
 all: $(BUILD)/kernel.bin
 	@echo "[ ✔  ] Build complete"
 
-$(BUILD)/boot.o: | $(BUILD)
-$(BUILD)/kernel.o: | $(BUILD)
-
+# Create build directory
 $(BUILD):
 	@echo "[ …… ] Creating build directory"
 	@mkdir -p $(BUILD)
 	@echo "[ ✔  ] Build directory created"
 
-$(BUILD)/boot.o: $(ASMSRC)/boot.asm
-	@echo "[ …… ] Assembling boot.asm"
-	@$(ASM) $(ASMFLAGS) $(ASMSRC)/boot.asm -o $(BUILD)/boot.o
-	@echo "[ ✔  ] boot.o created"
+# Compile each .o file by finding its corresponding source
+$(BUILD)/%.o: | $(BUILD)
+	@echo "[ …… ] Building $@"
+	@SRC_FILE=$$(find $(ASMSRC) -name '$*.asm' 2>/dev/null | head -1); \
+	if [ -n "$$SRC_FILE" ]; then \
+		echo "[ …… ] Assembling $$SRC_FILE"; \
+		$(ASM) $(ASMFLAGS) $$SRC_FILE -o $@; \
+		echo "[ ✔  ] $@ created"; \
+	else \
+		SRC_FILE=$$(find $(CSRC) -name '$*.c' 2>/dev/null | head -1); \
+		if [ -n "$$SRC_FILE" ]; then \
+			echo "[ …… ] Compiling $$SRC_FILE"; \
+			$(CC) $(CFLAGS) -c $$SRC_FILE -o $@; \
+			echo "[ ✔  ] $@ created"; \
+		else \
+			echo "[ ✖  ] Source file for $@ not found"; \
+			exit 1; \
+		fi; \
+	fi
 
-$(BUILD)/kernel.o: $(CSRC)/kernel.c 
-	@echo "[ …… ] Compiling kernel.c"
-	@$(CC) $(CFLAGS) -c $(CSRC)/kernel.c -o $(BUILD)/kernel.o
-	@echo "[ ✔  ] kernel.o created"
-
-$(BUILD)/kernel.bin: $(BUILD)/boot.o $(BUILD)/kernel.o 
+# Link all object files
+$(BUILD)/kernel.bin: $(OBJS)
 	@echo "[ …… ] Linking kernel"
-	@$(LD) $(LDFLAGS) $(SRC)/linker.ld -o $(BUILD)/kernel.bin $(BUILD)/boot.o $(BUILD)/kernel.o
+	@$(LD) $(LDFLAGS) $(SRC)/linker.ld -o $(BUILD)/kernel.bin $(OBJS)
 	@echo "[ ✔  ] kernel.bin created"
 
 iso: $(BUILD)/kernel.bin
@@ -49,7 +70,7 @@ verify: $(BUILD)/kernel.bin
 
 run-fast: $(BUILD)/kernel.bin
 	@echo "[ …… ] Running kernel in QEMU"
-	@qemu-system-x86_64 -kernel $(BUILD)/kernel.bin || echo "Direct boot no available, please use 'make run'"
+	@qemu-system-x86_64 -kernel $(BUILD)/kernel.bin || echo "Direct boot not available, please use 'make run'"
 
 run: iso
 	@echo "[ …… ] Running ISO in QEMU"
@@ -60,4 +81,12 @@ clean:
 	@rm -rf $(BUILD) $(ISO) okos.iso
 	@echo "[ ✔  ] Clean complete"
 
-.PHONY: all iso verify run run-fast clean
+# Debug target to see what files were found
+debug:
+	@echo "ASM sources: $(ASM_SOURCES)"
+	@echo "C sources: $(C_SOURCES)"
+	@echo "ASM objects: $(ASM_OBJS)"
+	@echo "C objects: $(C_OBJS)"
+	@echo "All objects: $(OBJS)"
+
+.PHONY: all iso verify run run-fast clean debug
