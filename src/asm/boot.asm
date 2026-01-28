@@ -13,7 +13,7 @@ multiboot_header_start:
   dd 8 
 multiboot_header_end:
 
-section.bss 
+section .bss 
 align 16
 stack_bottom:
   resb 16384    ;16 KiB stack 
@@ -79,21 +79,21 @@ enable_paging:
 
   mov eax, cr0 
   or eax, 1 << 31
-  moc cr0, eax 
+  mov cr0, eax 
 
   ret 
 
 setup_long_mode:
   ret 
 
-bit 64 
+bits 64 
 long_mode_start:
   mov ax, gdt64.data 
   mov ss, ax 
   mov ds, ax 
   mov es, ax 
   mov fs, ax 
-  moc gs, ax 
+  mov gs, ax 
 
   pop rdi 
   pop rsi 
