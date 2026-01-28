@@ -12,10 +12,12 @@ ASMSRC = src/asm
 CSRC = src/c 
 
 BUILD = build
+ISO = iso
 
 all:
-	@mkdir -p build
-
+	@echo "[ …… ] Dir check"
+	@mkdir -p build iso/boot/grub
+	@echo "[ ✔  ] Dir check"
 
 
 boot.o: $(ASMSRC)/boot.asm
@@ -24,10 +26,21 @@ boot.o: $(ASMSRC)/boot.asm
 kernel.o: $(CSRC)/kernel.c 
 	@$(CC) $(CFLAGS) -c $(CSRC)/kernel.c -o $(BUILD)/kernel.o 
 
+kernel.bin: $(BUILD)/boot.o $(BUILD)/kernel.o 
+	$(LD) $(LDFLAGS) -o $(BUILD)/kernel.bin $(BUILD)/boot.o $(BUILD)/kernel.o 
+
+iso:
+	@cp $(BUILD)/kernel.bin $(ISO)/boot/
+	@cp $(SRC)/grub.cfg $(ISO)/boot/grub/
+	grub-mkrescue -o okos.iso $(ISO)
+
+verify:
+	grub-file --is-x86-multiboot2 $(BUILD)/kernel.bin $$ echo "[ ✔  ] Valid Multiboot2 kernel" || echo "[ ✖  ] Invalid Multiboot2 kernel"
 
 clean:
-	@rm -r $(BUILD)
+	@rm -r $(BUILD) 
 
+.PHONY: all clean verify
 
 
 
