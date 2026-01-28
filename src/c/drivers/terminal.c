@@ -1,4 +1,5 @@
 #include "../inc/terminal.h"
+#include "../inc/idt.h"
 
 #include <stdarg.h>
 
@@ -12,12 +13,9 @@ static unsigned char color = 0x0F;
 
 void terminal_initialize(void) {
   terminal_clear();
+  terminal_printf("Welcome to {0A}OKOS{07}!\n");
 
-  terminal_writestring("Welcome to ");
-  terminal_setcolor(COLOR_LIGHT_GREEN);
-  terminal_writestring("OKOS");
-  terminal_setcolor(COLOR_WHITE);
-  terminal_writestring("!\n\n");
+  idt_install();
 }
 
 void terminal_clear(void) {
