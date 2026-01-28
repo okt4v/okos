@@ -9,6 +9,7 @@ void terminal_writeint(int num);
 void terminal_writehex(unsigned long num);
 void terminal_writestring(const char *str);
 void terminal_setcolor(unsigned char new_color);
+void terminal_printf(const char *format, ...);
 
 #define COLOR_BLACK 0x0
 #define COLOR_BLUE 0x1
