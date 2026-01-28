@@ -28,4 +28,10 @@ SECTIONS
   {
     *(.bss)
   }
+
+  /DISCARD/ :
+  {
+    *(.eh_frame)  
+    *(.comment)
+  }
 }

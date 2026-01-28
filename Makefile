@@ -3,10 +3,10 @@ ASMFLAGS = -f elf64
 CC = gcc
 CFLAGS = -ffreestanding -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -Wall -Wextra
 LD = ld 
-LDFLAGS = -n -T linker.ld 
+LDFLAGS = -n -T
 SRC = src
 ASMSRC = src/asm
-CSRC = src/c 
+CSRC = src/c
 BUILD = build
 ISO = iso
 
@@ -33,7 +33,7 @@ $(BUILD)/kernel.o: $(CSRC)/kernel.c
 
 $(BUILD)/kernel.bin: $(BUILD)/boot.o $(BUILD)/kernel.o 
 	@echo "[ …… ] Linking kernel"
-	@$(LD) $(LDFLAGS) -o $(BUILD)/kernel.bin $(BUILD)/boot.o $(BUILD)/kernel.o
+	@$(LD) $(LDFLAGS) $(SRC)/linker.ld -o $(BUILD)/kernel.bin $(BUILD)/boot.o $(BUILD)/kernel.o
 	@echo "[ ✔  ] kernel.bin created"
 
 iso: $(BUILD)/kernel.bin
@@ -47,11 +47,11 @@ iso: $(BUILD)/kernel.bin
 verify: $(BUILD)/kernel.bin
 	@grub-file --is-x86-multiboot2 $(BUILD)/kernel.bin && echo "[ ✔  ] Valid Multiboot2 kernel" || echo "[ ✖  ] Invalid Multiboot2 kernel"
 
-run: $(BUILD)/kernel.bin
+run-fast: $(BUILD)/kernel.bin
 	@echo "[ …… ] Running kernel in QEMU"
-	@qemu-system-x86_64 -kernel $(BUILD)/kernel.bin
+	@qemu-system-x86_64 -kernel $(BUILD)/kernel.bin || echo "Direct boot no available, please use 'make run'"
 
-run-iso: iso
+run: iso
 	@echo "[ …… ] Running ISO in QEMU"
 	@qemu-system-x86_64 -cdrom okos.iso
 
@@ -60,4 +60,4 @@ clean:
 	@rm -rf $(BUILD) $(ISO) okos.iso
 	@echo "[ ✔  ] Clean complete"
 
-.PHONY: all iso verify run run-iso clean
+.PHONY: all iso verify run run-fast clean
