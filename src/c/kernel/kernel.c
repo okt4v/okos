@@ -1,10 +1,11 @@
-#include "../inc/idt.h"
-#include "../inc/terminal.h"
+#include "../inc/initialize.h"
 
-void kernel_main(unsigned long magic, unsigned long addr) {
-  terminal_initialize();
+void kernel_main(void) {
+  // Initialize all system components
+  system_initialize();
 
+  // Main kernel loop - halt until interrupt
   while (1) {
-    __asm__("hlt");
+    __asm__ volatile("hlt");
   }
 }

@@ -1,4 +1,5 @@
 #include "../inc/idt.h"
+#include "../inc/pic.h"
 #include "../inc/terminal.h"
 #include <stdint.h>
 
@@ -74,6 +75,22 @@ void idt_install(void) {
   extern void isr29(void);
   extern void isr30(void);
   extern void isr31(void);
+  extern void isr32(void);
+  extern void isr33(void);
+  extern void isr34(void);
+  extern void isr35(void);
+  extern void isr36(void);
+  extern void isr37(void);
+  extern void isr38(void);
+  extern void isr39(void);
+  extern void isr40(void);
+  extern void isr41(void);
+  extern void isr42(void);
+  extern void isr43(void);
+  extern void isr44(void);
+  extern void isr45(void);
+  extern void isr46(void);
+  extern void isr47(void);
 
   // Register all 32 CPU exception handlers (0x8E = present, ring 0, 64-bit interrupt gate)
   idt_set_gate(0, (uint64_t)isr0, 0x08, 0x8E);
@@ -108,6 +125,24 @@ void idt_install(void) {
   idt_set_gate(29, (uint64_t)isr29, 0x08, 0x8E);
   idt_set_gate(30, (uint64_t)isr30, 0x08, 0x8E);
   idt_set_gate(31, (uint64_t)isr31, 0x08, 0x8E);
+
+  // Register IRQ handlers (32-47)
+  idt_set_gate(32, (uint64_t)isr32, 0x08, 0x8E);
+  idt_set_gate(33, (uint64_t)isr33, 0x08, 0x8E);
+  idt_set_gate(34, (uint64_t)isr34, 0x08, 0x8E);
+  idt_set_gate(35, (uint64_t)isr35, 0x08, 0x8E);
+  idt_set_gate(36, (uint64_t)isr36, 0x08, 0x8E);
+  idt_set_gate(37, (uint64_t)isr37, 0x08, 0x8E);
+  idt_set_gate(38, (uint64_t)isr38, 0x08, 0x8E);
+  idt_set_gate(39, (uint64_t)isr39, 0x08, 0x8E);
+  idt_set_gate(40, (uint64_t)isr40, 0x08, 0x8E);
+  idt_set_gate(41, (uint64_t)isr41, 0x08, 0x8E);
+  idt_set_gate(42, (uint64_t)isr42, 0x08, 0x8E);
+  idt_set_gate(43, (uint64_t)isr43, 0x08, 0x8E);
+  idt_set_gate(44, (uint64_t)isr44, 0x08, 0x8E);
+  idt_set_gate(45, (uint64_t)isr45, 0x08, 0x8E);
+  idt_set_gate(46, (uint64_t)isr46, 0x08, 0x8E);
+  idt_set_gate(47, (uint64_t)isr47, 0x08, 0x8E);
 
   idt_load((uint64_t)&idtp);
 
@@ -160,4 +195,36 @@ void isr_handler(uint64_t interrupt_number, uint64_t error_code) {
   while (1) {
     __asm__ volatile("cli; hlt");
   }
+}
+
+// IRQ handler table
+static void (*irq_handlers[16])(void) = {0};
+
+void irq_install_handler(uint8_t irq, void (*handler)(void)) {
+  if (irq < 16) {
+    irq_handlers[irq] = handler;
+  }
+}
+
+void irq_handler(uint64_t irq_number) {
+  // Handle spurious IRQs (IRQ7 and IRQ15)
+  if (irq_number == 7 || irq_number == 15) {
+    // Check if it's a real IRQ or spurious
+    uint8_t isr = inb(irq_number == 7 ? 0x20 : 0xA0);
+    if (!(isr & (1 << (irq_number & 7)))) {
+      // Spurious IRQ, only send EOI to master if it's IRQ15
+      if (irq_number == 15) {
+        pic_send_eoi(7); // Send EOI to master only
+      }
+      return;
+    }
+  }
+
+  // Call registered handler if exists
+  if (irq_number < 16 && irq_handlers[irq_number] != 0) {
+    irq_handlers[irq_number]();
+  }
+
+  // Send EOI to PIC
+  pic_send_eoi(irq_number);
 }

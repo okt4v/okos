@@ -1,6 +1,7 @@
 section .text
 
 extern isr_handler
+extern irq_handler
 
 %macro ISR_NOERRCODE 1
 global isr%1
@@ -15,6 +16,14 @@ global isr%1
 isr%1:
   push %1
   jmp isr_common_stub
+%endmacro
+
+%macro IRQ 2
+global isr%1
+isr%1:
+  push 0
+  push %2
+  jmp irq_common_stub
 %endmacro
 
 ISR_NOERRCODE 0   ; Division By Zero
@@ -50,6 +59,24 @@ ISR_ERRCODE   29  ; VMM Communication Exception
 ISR_ERRCODE   30  ; Security Exception
 ISR_NOERRCODE 31  ; Reserved
 
+; IRQ handlers (remapped to 32-47)
+IRQ 32, 0   ; IRQ0 - PIT Timer
+IRQ 33, 1   ; IRQ1 - Keyboard
+IRQ 34, 2   ; IRQ2 - Cascade
+IRQ 35, 3   ; IRQ3 - COM2
+IRQ 36, 4   ; IRQ4 - COM1
+IRQ 37, 5   ; IRQ5 - LPT2
+IRQ 38, 6   ; IRQ6 - Floppy
+IRQ 39, 7   ; IRQ7 - LPT1
+IRQ 40, 8   ; IRQ8 - RTC
+IRQ 41, 9   ; IRQ9 - Free
+IRQ 42, 10  ; IRQ10 - Free
+IRQ 43, 11  ; IRQ11 - Free
+IRQ 44, 12  ; IRQ12 - PS2 Mouse
+IRQ 45, 13  ; IRQ13 - FPU
+IRQ 46, 14  ; IRQ14 - Primary ATA
+IRQ 47, 15  ; IRQ15 - Secondary ATA
+
 isr_common_stub:
 
   push rax
@@ -71,6 +98,50 @@ isr_common_stub:
   mov rdi, [rsp + 120]
   mov rsi, [rsp + 128]
   call isr_handler
+
+  pop r15
+  pop r14
+  pop r13
+  pop r12
+  pop r11
+  pop r10
+  pop r9
+  pop r8
+  pop rbp
+  pop rdi
+  pop rsi
+  pop rdx
+  pop rcx
+  pop rbx
+  pop rax
+
+  add rsp, 16
+  iretq
+
+irq_common_stub:
+  push rax
+  push rbx
+  push rcx
+  push rdx
+  push rsi
+  push rdi
+  push rbp
+  push r8
+  push r9
+  push r10
+  push r11
+  push r12
+  push r13
+  push r14
+  push r15
+
+  ; IRQ number is at rsp + 120 (15 * 8 bytes)
+  mov rdi, [rsp + 120]
+
+  ; Align stack to 16 bytes before call
+  sub rsp, 8
+  call irq_handler
+  add rsp, 8
 
   pop r15
   pop r14
