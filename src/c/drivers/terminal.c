@@ -29,8 +29,13 @@ void terminal_putchar(char c) {
   if (c == '\n') {
     cursor_x = 0;
     cursor_y++;
+  } else if (c == '\b') {
+    // Backspace: move cursor back if not at start of line
+    if (cursor_x > 0) {
+      cursor_x--;
+    }
   } else if (c == '\t') {
-    cursor_x = (cursor_y + 4) & ~(4 - 1);
+    cursor_x = (cursor_x + 4) & ~(4 - 1);
   } else {
     int index = (cursor_y * VGA_WIDTH + cursor_x) * 2;
     vga_buffer[index] = c;

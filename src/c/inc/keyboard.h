@@ -13,4 +13,10 @@ void keyboard_install(void);
 // Keyboard interrupt handler
 void keyboard_handler(void);
 
+// Set keyboard layout (e.g., "us", "de")
+void keyboard_set_layout(const char *layout_name);
+
+// Get current keyboard layout
+const char* keyboard_get_layout(void);
+
 #endif

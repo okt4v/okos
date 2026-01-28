@@ -2,6 +2,7 @@
 #include "../inc/idt.h"
 #include "../inc/keyboard.h"
 #include "../inc/pic.h"
+#include "../inc/shell.h"
 #include "../inc/terminal.h"
 
 void system_initialize(void) {
@@ -23,7 +24,6 @@ void system_initialize(void) {
   // Enable hardware interrupts
   __asm__ volatile("sti");
 
-  // Ready message
-  terminal_printf("\n{0E}Keyboard ready. Start typing!{0F}\n");
-  terminal_printf("> ");
+  // Initialize shell
+  shell_init();
 }
