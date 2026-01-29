@@ -10,8 +10,45 @@ static unsigned char color = 0x0F;
 #define VGA_WIDTH 80
 #define VGA_HEIGHT 25
 
+// VGA cursor control ports
+#define VGA_CTRL_PORT 0x3D4
+#define VGA_DATA_PORT 0x3D5
+
+// I/O port access functions
+static inline void outb(unsigned short port, unsigned char value) {
+  __asm__ volatile("outb %0, %1" : : "a"(value), "Nd"(port));
+}
+
+// Enable the hardware cursor
+void terminal_enable_cursor(void) {
+  outb(VGA_CTRL_PORT, 0x0A); // Cursor start register
+  outb(VGA_DATA_PORT, 0x0E); // Cursor start line (14)
+  outb(VGA_CTRL_PORT, 0x0B); // Cursor end register
+  outb(VGA_DATA_PORT, 0x0F); // Cursor end line (15)
+}
+
+// Disable the hardware cursor
+void terminal_disable_cursor(void) {
+  outb(VGA_CTRL_PORT, 0x0A);
+  outb(VGA_DATA_PORT, 0x20); // Disable cursor by setting bit 5
+}
+
+// Update the hardware cursor position
+void terminal_update_cursor(void) {
+  unsigned short position = cursor_y * VGA_WIDTH + cursor_x;
+
+  // Send low byte
+  outb(VGA_CTRL_PORT, 0x0F);
+  outb(VGA_DATA_PORT, (unsigned char)(position & 0xFF));
+
+  // Send high byte
+  outb(VGA_CTRL_PORT, 0x0E);
+  outb(VGA_DATA_PORT, (unsigned char)((position >> 8) & 0xFF));
+}
+
 void terminal_initialize(void) {
   terminal_clear();
+  terminal_enable_cursor();
 }
 
 void terminal_clear(void) {
@@ -21,6 +58,7 @@ void terminal_clear(void) {
   }
   cursor_x = 0;
   cursor_y = 0;
+  terminal_update_cursor();
 }
 
 void terminal_setcolor(unsigned char new_color) { color = new_color; }
@@ -52,6 +90,8 @@ void terminal_putchar(char c) {
     terminal_scroll();
     cursor_y = VGA_HEIGHT - 1;
   }
+
+  terminal_update_cursor();
 }
 
 void terminal_scroll(void) {
